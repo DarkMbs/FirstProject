@@ -4,15 +4,18 @@ import numpy as np
 names = []
 balances = []
 passwords = []
+try:
+    df = pd.read_csv('accounts.csv')
+    for i in range(len(df['name'])):
+        names.append(df['name'][i])
+        balances.append(df['balance'][i])
+        passwords.append(str(df['password'][i]))
+except:
+    with open('accounts.csv', 'w') as f:
+        f.write(',name,balance,password')
 
 key = Fernet.generate_key()
 crypter = Fernet(key)
-
-df = pd.read_csv('accounts.csv')
-for i in range(len(df['name'])):
-    names.append(df['name'][i])
-    balances.append(df['balance'][i])
-    passwords.append(str(df['password'][i]))
 
 
 def name_ser(name):
