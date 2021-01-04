@@ -1,9 +1,12 @@
 import pandas as pd
 from cryptography.fernet import Fernet
 import numpy as np
+
+
 names = []
 balances = []
 passwords = []
+
 try:
     df = pd.read_csv('accounts.csv')
     for i in range(len(df['name'])):
