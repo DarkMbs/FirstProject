@@ -46,16 +46,6 @@ def bal_check(name):
             pass
 
 
-def sub_menu():
-    opt = int(input('Enter 1: '))
-    if opt == 1:
-        name_search = input('Enter Name... ')
-        if name_ser(name_search) == True:
-            bal_check(name_search)
-        else:
-            print('Account not found')
-
-
 def main_menu():
     print('Welcome!\nPlease Choose from the following options...')
     print('1: Create an account\n2: Login ')
