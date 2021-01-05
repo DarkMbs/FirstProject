@@ -1,5 +1,4 @@
 import pandas as pd
-from cryptography.fernet import Fernet
 import numpy as np
 
 
@@ -17,9 +16,6 @@ except:
     with open('accounts.csv', 'w') as f:
         f.write(',name,balance,password')
 
-key = Fernet.generate_key()
-crypter = Fernet(key)
-
 
 def name_ser(name):
     found = False
@@ -33,9 +29,7 @@ def acc_creation(name):
     names.append(name)
     balances.append(0)
     password_enter = input('Create a Password: ')
-    bit_pass = b'password_enter'
-    pwd = crypter.encrypt(bit_pass)
-    passwords.append(str(pwd, 'utf8'))
+    passwords.append(password_enter)
     new_df = pd.DataFrame(np.column_stack([names, balances, passwords]),
                           columns=['name', 'balance', 'password'])
     new_df.to_csv('accounts.csv', encoding='utf-8', sep=',',
@@ -52,9 +46,19 @@ def bal_check(name):
             pass
 
 
-def menu():
+def sub_menu():
+    opt = int(input('Enter 1: '))
+    if opt == 1:
+        name_search = input('Enter Name... ')
+        if name_ser(name_search) == True:
+            bal_check(name_search)
+        else:
+            print('Account not found')
+
+
+def main_menu():
     print('Welcome!\nPlease Choose from the following options...')
-    print('1: Create an account\n2: Check balance')
+    print('1: Create an account\n2: Login ')
     opt = int(input('Enter Your Choice: '))
     if opt == 1:
         name_search = input('Enter Name... ')
@@ -64,11 +68,13 @@ def menu():
             acc_creation(name_search)
             print('Account created!')
     if opt == 2:
-        name_search = input('Enter Name... ')
+        name_search = input('Enter your login name: ')
         if name_ser(name_search) == True:
-            bal_check(name_search)
-        else:
-            print('Account not found')
+            password = input('Enter your password: ')
+            for i in range(len(names)):
+                if names[i] == name_search:
+                    if password == passwords[i]:
+                        print('Logged in!')
 
 
-menu()
+main_menu()
