@@ -1,5 +1,16 @@
 import pandas as pd
+from cryptography.fernet import Fernet
 import numpy as np
+
+try:
+    file = open('pwkey', 'r')
+    key = file.read()
+    file.close()
+except:
+    key = Fernet.generate_key()
+    file = open('pwkey', 'wb')
+    file.write(key)
+    file.close()
 
 
 names = []
@@ -8,28 +19,38 @@ passwords = []
 
 try:
     df = pd.read_csv('accounts.csv')
-    for i in range(len(df['name'])):
-        names.append(df['name'][i])
-        balances.append(df['balance'][i])
-        passwords.append(str(df['password'][i]))
+    if len(df['name']) == 0:
+        pass
+    else:
+        for i in range(len(df['name'])):
+            names.append(df['name'][i])
+            balances.append(df['balance'][i])
+            passwords.append(df['password'][i])
 except:
-    with open('accounts.csv', 'w') as f:
-        f.write(',name,balance,password')
+    f = open('accounts.csv', 'w')
+    f.write(',name,balance,password')
 
 
 def name_ser(name):
-    found = False
-    for i in range(len(names)):
-        if names[i] == name:
-            found = True
-    return found
+    # Check if element is in list
+    if name in names:
+        # Return index of element
+        return names.index(name)
+    else:
+        # Name was not found in the list
+        return -1
 
 
 def acc_creation(name):
     names.append(name)
     balances.append(0)
     password_enter = input('Create a Password: ')
-    passwords.append(password_enter)
+    encry_p = password_enter.encode()
+    f = Fernet(key)
+
+    encry_pass = f.encrypt(encry_p)
+    encry_pass = encry_pass.decode('ascii')
+    passwords.append(encry_pass)
     new_df = pd.DataFrame(np.column_stack([names, balances, passwords]),
                           columns=['name', 'balance', 'password'])
     new_df.to_csv('accounts.csv', encoding='utf-8', sep=',',
@@ -52,19 +73,32 @@ def main_menu():
     opt = int(input('Enter Your Choice: '))
     if opt == 1:
         name_search = input('Enter Name... ')
-        if name_ser(name_search) == True:
-            print("Account Already excites!")
-        else:
+        found = name_ser(name_search)
+
+        if found >= 0:
+            print("Account Already exists!")
+
+        elif found == -1 & len(names) == 0:
             acc_creation(name_search)
             print('Account created!')
+
     if opt == 2:
         name_search = input('Enter your login name: ')
-        if name_ser(name_search) == True:
+        found = name_ser(name_search)
+        if found != -1:
             password = input('Enter your password: ')
-            for i in range(len(names)):
-                if names[i] == name_search:
-                    if password == passwords[i]:
-                        print('Logged in!')
+            dec_pass = bytes(passwords[found], 'utf-8')
+            f = Fernet(key)
+            decrypted = f.decrypt(dec_pass)
+            decrypted = decrypted.decode()
+            if password == decrypted:
+                print('Logged in!')
+
+            else:
+                print('Invalid username or password')
 
 
-main_menu()
+op = 2
+while op != 0:
+    main_menu()
+    op = int(input('Do You want to exit the program?\n0:Yes \n1:No\n'))
