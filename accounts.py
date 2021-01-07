@@ -2,6 +2,7 @@ import pandas as pd
 from cryptography.fernet import Fernet
 import numpy as np
 
+
 try:
     file = open('pwkey', 'r')
     key = file.read()
@@ -19,13 +20,10 @@ passwords = []
 
 try:
     df = pd.read_csv('accounts.csv')
-    if len(df['name']) == 0:
-        pass
-    else:
-        for i in range(len(df['name'])):
-            names.append(df['name'][i])
-            balances.append(df['balance'][i])
-            passwords.append(df['password'][i])
+    for i in range(len(df['name'])):
+        names.append(df['name'][i])
+        balances.append(df['balance'][i])
+        passwords.append(df['password'][i])
 except:
     f = open('accounts.csv', 'w')
     f.write(',name,balance,password')
@@ -73,12 +71,9 @@ def main_menu():
     opt = int(input('Enter Your Choice: '))
     if opt == 1:
         name_search = input('Enter Name... ')
-        found = name_ser(name_search)
-
-        if found >= 0:
+        if name_search in names:
             print("Account Already exists!")
-
-        elif found == -1 & len(names) == 0:
+        else:
             acc_creation(name_search)
             print('Account created!')
 
